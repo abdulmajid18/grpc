@@ -1,31 +1,27 @@
 package main
 
 import (
-	"context"
-
-	"github.com/gofrs/uuid"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"log"
+	"net"
 
 	pb "github.com/abdulmajid18/grpc/productinfo/service/ecommerce"
+	"google.golang.org/grpc"
 )
 
-// server is used to implement ecommmerce/product_info
+const (
+	port = ":50051"
+)
 
-type server struct {
-	productMap map[string]pb.Product
-}
-
-// AddProduct implements ecommerce.AddProduct
-
-func (s *server) AddProduct(ctx context.Context, in *pb.Product) (*pb.ProductID, error) {
-	out, err := uuid.NewV4()
+func main() {
+	lis, err := net.Listen("tcp", port)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Error while generaating Product ID", error)
+		log.Fatalf("failed to liisen: %v", err)
 	}
-	in.Id = out.String()
-	if s.productMap == nil {
-		s.productMap = make(map[string]pb.Product)
+	s := grpc.NewServer()
+	pb.RegisterProductInfoServer(s, &server{})
+	log.Printf("Starting gRPC listener on port " + port)
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
 	}
 
 }
