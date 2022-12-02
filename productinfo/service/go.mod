@@ -1,4 +1,4 @@
-module productinfo/service
+module github.com/abdulmajid18/grpc/productinfo/service
 
 go 1.18
 
